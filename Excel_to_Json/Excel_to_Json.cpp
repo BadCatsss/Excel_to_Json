@@ -10,39 +10,18 @@
 #define _SCL_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #pragma warning(disable: 4996)
-using namespace YExcel;
-using namespace std;
+
+
 using boost::property_tree::ptree;
-size_t maxRows;
-size_t maxCols;
-set<string> Names;
-BasicExcelCell* cell;
-multimap<string, int> Data;
-BasicExcelWorksheet* sheet1;
-vector<vector<int>> DataBlock;
-string f_name;
-void PrintNames()
-{
-	for (auto it : Names)
-	{
-		cout << "Found Names" << setw(10) << it << endl;
-	}
-}
-void PrintData()
-{
+#include "Data_Interface.h"
 
-	for (auto i : Data)
-	{
-		cout << i.first << setw(4) << i.second << endl;
-	}
-}
 
-void PrintBlocksToFile()
+void Convertor::PrintBlocksToFile()
 {
 
 
 
-	auto it = Names.begin();
+	auto it = this->Names.begin();
 
 
 	// Short alias for this namespace
@@ -54,7 +33,7 @@ void PrintBlocksToFile()
 
 	// Add a matrix
 
-	vector<vector<int>> matrix(DataBlock.size());
+	vector<vector<int>> matrix(this->DataBlock.size());
 	for (int i = 0; i < DataBlock.size(); i++)
 	{
 		matrix[i] = (vector<int>(1000));
@@ -89,7 +68,7 @@ void PrintBlocksToFile()
 
 	// Add the node to the root
 
-	string s= strtok(const_cast<char*>(f_name.c_str()), ".");
+	string s = strtok(const_cast<char*>(this->f_str_name.c_str()), ".");
 	write_json(s + ".json", root);
 
 
@@ -101,17 +80,21 @@ void PrintBlocksToFile()
 
 
 }
-void GetDigitalStandartName()
+void Convertor::GetDigitalStandartName()
 {
 
 	for (size_t r = 1; r < maxRows; ++r)
 	{
-		BasicExcelCell* cell = sheet1->Cell(r, 0);
+		YExcel::BasicExcelCell* cell = sheet1->Cell(r, 0);
 		Names.emplace(cell->GetString());
 	}
-	PrintNames();
+	if (this->PrintNameFlag)
+	{
+		PrintNames();
+	}
+
 };
-void GetData()
+void Convertor::GetData()
 {
 	int r = 1;
 	auto Names_it = Names.begin();
@@ -126,11 +109,14 @@ void GetData()
 		}
 	}
 
-
-	//PrintData();
+	if (PrintDataFlag)
+	{
+		PrintData();
+	}
+	
 
 };
-void CreateBlockByName()
+void Convertor::CreateBlockByName()
 {
 
 	DataBlock.resize((Names.size()));
@@ -157,39 +143,101 @@ void CreateBlockByName()
 
 	PrintBlocksToFile();
 }
-
-int main()
+void Convertor::PrintNames()
 {
-	BasicExcel e;
-	cout << "enter file name:" << endl;
-	cout << "example: 'file.xls'" << endl;
-	cin >> f_name;
-	const char* f_ch_name = f_name.c_str();
+	for (auto it : Names)
+	{
+		cout << "Found Names" << setw(10) << it << endl;
+	}
+}
+void Convertor::PrintData()
+{
 
-	if (e.Load(f_ch_name))
+	for (auto i : Data)
+	{
+		cout << i.first << setw(4) << i.second << endl;
+	}
+}
+void Convertor::OpenFile()
+{
+	if (e.Load(this->f_str_name.c_str()))
 	{
 		cout << "file is open" << endl;
 	}
+}
+void Convertor::SetSheet(string sheet_name)
+{
+	this->sheet_name = sheet_name;
+}
+string Convertor::GetSheetNameStr()
+{
+	return this->sheet_name;
+}
+const char*  Convertor::GetSheetNameChar()
+{
+	return this->sheet_name.c_str();
+}
+void Convertor::OpenSheet(YExcel::BasicExcelWorksheet* p)
+{
+	this->sheet1 = p;
+}
+YExcel::BasicExcelWorksheet* Convertor::GetSheetObj()
+{
+	return this->sheet1;
+}
+string Convertor::GetFileStrName()
+{
+	return this->f_str_name;
+}
+const char* Convertor::GetFileCharName()
+{
+	return this->f_str_name.c_str();
+}
+void Convertor::SetMaxRows(rsize_t s)
+{
+	this->maxRows = s;
+}
+void Convertor::SetMaxColumns(rsize_t s)
+{
+	this->maxCols = s;
+}
+void Convertor::Generate()
+{
+	this->GetDigitalStandartName();
+	this->GetData();
+	this->CreateBlockByName();
+}
 
+
+
+
+
+int main()
+{
+	string f_name;
+	string sh_name;
+	cout << "enter file name:" << endl;
+	cout << "example: 'file.xls'" << endl;
+	cin >> f_name;
 
 	cout << "enter sheet name:" << endl;
 	cout << "example: 'Sheet1'" << endl;
-	string sheet_name;
-	cin >> sheet_name;
-	
+	cin >> sh_name;
+	Convertor cnv(f_name,false,true);
+	cnv.OpenFile();
+	cnv.SetSheet(sh_name.c_str());
+		
 
-	sheet1 = e.GetWorksheet(sheet_name.c_str());
+	cnv.OpenSheet( cnv.e.GetWorksheet (cnv.GetSheetNameChar()));
 
-	if (sheet1)
+	if (cnv.GetSheetObj())
 	{
 		cout << "sheet is open" << endl;
-		maxRows = sheet1->GetTotalRows();
-		maxCols = sheet1->GetTotalCols();
+		cnv.SetMaxRows( cnv.GetSheetObj()->GetTotalRows());
+		cnv.SetMaxColumns( cnv.GetSheetObj()->GetTotalCols());
+		cnv.Generate();
 
-
-		GetDigitalStandartName();
-		GetData();
-		CreateBlockByName();
+		
 
 	}
 	cout << endl;
@@ -199,13 +247,3 @@ int main()
 	return 0;
 }
 
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
-
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.

@@ -168,6 +168,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BasicExcel.hpp" />
+    <ClInclude Include="Data_Interface.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
