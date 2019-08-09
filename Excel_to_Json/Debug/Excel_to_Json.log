@@ -1,6 +1,0 @@
-﻿  Excel_to_Json.cpp
-d:\excel_to_json\excel_to_json\excel_to_json.cpp(41): warning C4018: <: несоответствие типов со знаком и без знака
-d:\excel_to_json\excel_to_json\excel_to_json.cpp(45): warning C4018: <: несоответствие типов со знаком и без знака
-d:\excel_to_json\excel_to_json\excel_to_json.cpp(74): warning C4018: <: несоответствие типов со знаком и без знака
-d:\excel_to_json\excel_to_json\excel_to_json.cpp(100): warning C4018: <: несоответствие типов со знаком и без знака
-  Excel_to_Json.vcxproj -> D:\Excel_to_Json\Debug\Excel_to_Json.exe
