@@ -1,7 +1,4 @@
-﻿
-
-
-#include <QCoreApplication>
+﻿#include <QCoreApplication>
 #include <QCoreApplication>
 #include "xlsxdocument.h"
 #include "xlsxchartsheet.h"
@@ -272,6 +269,7 @@ void Convertor::PrintBlocksToFile()
     // Записываем текущий объект Json в файл
     jsonFile.write(QJsonDocument(m_currentJsonObject).toJson(QJsonDocument::Indented));
     jsonFile.close();   // Закрываем файл
+    cout<<"file correct create"<<endl;
 
 
 

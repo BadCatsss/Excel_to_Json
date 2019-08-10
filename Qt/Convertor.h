@@ -31,8 +31,8 @@ private:
     vector<vector<int>> DataBlock;
     QXlsx::Document* xlsxR;
     QXlsx::AbstractSheet* ActiveSheet;
-
     int sheet_count;
+
     void PrintNames();
     void PrintData();
 
