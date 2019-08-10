@@ -3,9 +3,7 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-
     QTextStream qtin(stdin);
-
     QTextStream qtout(stdout);
      QString f_path;
        string f_std_str_path;
@@ -26,10 +24,7 @@ int main(int argc, char *argv[])
     qtin>>ch_2;
     PrintDataFlag=ch_2;
     Convertor cnv(f_path,PrintDataFlag,PrintNameFlag);
-
         cnv.OpenBook();
-
-
     QStringList sh_list= cnv.OpenWorkSheet();
     int ch_number=0;
     cout<<"choose current worksheet. enter the number"<<endl;
