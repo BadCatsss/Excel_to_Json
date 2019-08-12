@@ -20,47 +20,29 @@ private:
     void PrintBlocksToFile();
     ///////////////////////////
 
-
-    QString f_str_name;
-    QString f_str_path;
-    size_t maxRows;
-    size_t maxCols;
-    bool PrintDataFlag,PrintNameFlag;
+    QString f_str_name = nullptr;
+    QString f_str_path = nullptr;
+    size_t maxRows = 0;
+    size_t maxCols = 0;
+    bool PrintDataFlag = false;
+    bool PrintNameFlag = false;
     set<QVariant> Names;
-    QMultiMap<QString, int >  Data;
+    QMultiMap<QString, int > Data;
     vector<vector<int>> DataBlock;
-    QXlsx::Document* xlsxR;
-    QXlsx::AbstractSheet* ActiveSheet;
-    int sheet_count;
+    QXlsx::Document* xlsxR = nullptr;
+    QXlsx::AbstractSheet* ActiveSheet = nullptr;
+    int sheet_count = 0;
 
-    void PrintNames();
-    void PrintData();
-
+    void calculateNotEmptyRowsCount();
+    void calculateNotEmptyColumnsCount();
+    void printNamesToConsole();
+    void printDataToConsole();
+    QStringList  getSheetsList();
+    void setActivetWorkSheet(QString);
+//    int getSheetCount() const;
 
 public:
-    static QString  ParsePath(QString path);
-    void OpenBook();
-    QXlsx::Document* GetBook() const;
-    QStringList  OpenWorkSheet();
-    void SetActivetWorkSheet(QString);
-    QXlsx::AbstractSheet* GetActivetWorkSheet() const;
-    int GetSheetCount() const;
-
-
-
-    void SetMaxRows();
-    void SetMaxColumns();
-    void Generate();
-
-
-
-
-
-
-    Convertor(QString f_str_path, bool f1, bool f2) ;
-
-
-
-
-
+    bool openBook();
+    void convert();
+    Convertor(const QString& f_str_path, bool PrintDataFlag, bool PrintNameFlag);
 };

@@ -12,33 +12,26 @@ using namespace QXlsx;
 using namespace std;
 
 //initialize
-Convertor::Convertor(QString f_str_path, bool f1, bool f2) :PrintDataFlag(f1), PrintNameFlag(f2),sheet_count(0),f_str_path(f_str_path)
+Convertor::Convertor(const QString& f_str_path, bool PrintDataFlag, bool PrintNameFlag) :PrintDataFlag(PrintDataFlag), PrintNameFlag(PrintNameFlag),sheet_count(0),f_str_path(f_str_path)
 {
-    xlsxR= new  QXlsx::Document(f_str_path);
-    string s=f_str_path.toStdString();
-    s.erase(s.begin()+s.find("."),s.end());
-    this->f_str_name=QString::fromStdString( s );
+    xlsxR = new QXlsx::Document(f_str_path);
+    string tmp_s = f_str_path.toStdString();
+    tmp_s.erase(tmp_s.begin() + tmp_s.find("."), tmp_s.end());
+    this->f_str_name=QString::fromStdString(tmp_s);
 }
-QString Convertor:: ParsePath(QString path)
-{
-    //    QTextStream s(stdout);
 
-    //         s<< QFileInfo (path).absolutePath()<<endl;
-    return QFileInfo (path).absoluteFilePath();
-}
 //book and sheet setup
-void Convertor::OpenBook()
+bool Convertor::openBook()
 {
     if (this->xlsxR->load())
     {
-        cout << "file is open" << endl;
+        return true;
     }
     else {
-        cout<<" Cant open File"<<endl;
-        exit(-1);
+        return false;
     }
 }
-void Convertor::SetMaxRows( )
+void Convertor::calculateNotEmptyRowsCount( )
 {
     int row = 1;
     Cell* cell = this->xlsxR->cellAt(row, 1); // get cell pointer.
@@ -47,10 +40,9 @@ void Convertor::SetMaxRows( )
         cell = this->xlsxR->cellAt(row, 1);
     }
     this->maxRows=row;
-    cout<<"row "<<this->maxRows<<endl;
-
+    cout << "row "<< this->maxRows << endl;
 }
-void Convertor::SetMaxColumns( )
+void Convertor::calculateNotEmptyColumnsCount( )
 {
     int col = 1;
     Cell* cell = this->xlsxR->cellAt(1, col); // get cell pointer.
@@ -59,81 +51,71 @@ void Convertor::SetMaxColumns( )
         cell = this->xlsxR->cellAt(1, col);
     }
     this->maxCols=col;
-    cout<<"col "<<this->maxCols<<endl;
+    cout<< "col " << this->maxCols << endl;
 
 }
-int Convertor:: GetSheetCount() const
-{
-    return this->sheet_count;
-}
-void Convertor::SetActivetWorkSheet(QString p)
+void Convertor::setActivetWorkSheet(QString p)
 {
     this->ActiveSheet= this->xlsxR->sheet(p);
-
     this->xlsxR->selectSheet(this->ActiveSheet->sheetName());
 }
-QXlsx::AbstractSheet* Convertor:: GetActivetWorkSheet() const
+QStringList  Convertor::getSheetsList()
 {
-    QTextStream qtout(stdout);
-    qtout<<this->ActiveSheet->sheetName()<<endl;
-    return this->ActiveSheet;
-
-}
-QXlsx::Document* Convertor:: GetBook() const
-{
-    return this->xlsxR;
-}
-QStringList  Convertor::OpenWorkSheet()
-{
-
-
-    cout<<"Sheet is found"<<endl;
+    cout << "Sheet is found" << endl;
     QStringList list_;
     QTextStream qtout(stdout);
     this->sheet_count;
     for (auto i:  this->xlsxR->sheetNames())
     {
         list_.push_back(i);
-        cout<<sheet_count<<"  ";
+        cout << sheet_count << "  ";
         qtout<<i<<endl;
         sheet_count++;
     }
-
     return list_;
 }
 
 //pharse
-void Convertor::Generate()
+void Convertor::convert()
 {
+    QStringList sh_list = this->getSheetsList();
+    int choose_number = 0;
+    cout << "choose current worksheet. enter the number" << endl;
+    cin >> choose_number;
+    if (choose_number>=0 && choose_number<= this->sheet_count ) {
+        this->setActivetWorkSheet(sh_list[choose_number]);
+    }
+    QTextStream qtout(stdout);
+    qtout << "You chose " << this->ActiveSheet->sheetName() << endl;
+    this->calculateNotEmptyRowsCount();
+    this->calculateNotEmptyColumnsCount();
     this->GetDigitalStandartName();
     this->GetData();
     this->CreateBlockByName();
 }
 void Convertor::GetDigitalStandartName()
 {
-
     for (size_t r = 2; r < maxRows; r++)
     {
-        Cell* cell = this->GetBook()->cellAt(r, 1);
+        Cell* cell = this->xlsxR->cellAt(r, 1);
         Names.emplace(cell->value());
     }
     if (this->PrintNameFlag)
     {
-        PrintNames();
+        printNamesToConsole();
     }
 
-};
+}
 void Convertor::GetData()
 {
     int r = 2;
     auto Names_it = Names.begin();
     vector<vector<int>> Datablock;
-
     QTextStream qtout(stdout);
     for (; r < maxRows; r++)
     {
 
-        for (int c = 2; c <maxCols; c++)
+        for (int c = 2; c < maxCols; c++)
         {
 
             // при 0 - падает
@@ -143,11 +125,11 @@ void Convertor::GetData()
 
     if (PrintDataFlag)
     {
-        PrintData();
+        printDataToConsole();
     }
 
 
-};
+}
 void Convertor::CreateBlockByName()
 {
 
@@ -180,49 +162,46 @@ void Convertor::CreateBlockByName()
 
 //out
 //to console
-void Convertor::PrintNames()
+void Convertor::printNamesToConsole()
 {
     QTextStream qtout(stdout);
     for (auto it : Names)
     {
-        qtout   << it.toString() << endl;
+        qtout << it.toString() << endl;
     }
 }
-void Convertor::PrintData()
+void Convertor::printDataToConsole()
 { QTextStream qtout(stdout);
-    QMultiMap<QString, int > ::iterator it=Data.begin();
+    QMultiMap<QString, int > ::iterator it = Data.begin();
     for (;it!=Data.end();it++)
     {
-        qtout<<it.key();
-        qtout<<it.value()<<endl;
+        qtout << it.key();
+        qtout << it.value() << endl;
     }
 }
 //to file
 void Convertor::PrintBlocksToFile()
 {
     auto it_Names = Names.begin();
-    auto it_Data_Block=DataBlock.begin();
+    auto it_Data_Block = DataBlock.begin();
     // Текущий json объект, с которым производится работа
     QJsonObject m_currentJsonObject;
     QJsonArray listArray;
     // Создаём объект текста
-    int c=0;
-    int r=0;
+    int c = 0;
+    int r = 0;
     int current_size;
     QJsonArray textsArray = m_currentJsonObject[it_Names->toString()].toArray();
     for (;it_Data_Block!=DataBlock.end();it_Data_Block++,c++) {
         r=DataBlock[c].size();
 
-        for(vector<int>::iterator it2 = (*it_Data_Block).begin() ; it2 != (*it_Data_Block).end(),r-4>=0; ++it2 ,r -= 4){
-
-
+        for(vector<int>::iterator it2 = (*it_Data_Block).begin() ; it2 != (*it_Data_Block).end(),r-4 >= 0; ++it2 ,r -= 4){
             vector<int> tmp_v;
-            int tmp=r-1;
-            for (int var = 0; var <4 ; var++) {
-                if (tmp-var>=0) {
+            int tmp = r-1;
+            for (int var = 0; var < 4 ; var++) {
+                if (tmp-var >= 0) {
                     textsArray.push_back(DataBlock[c][tmp-var]);
-                }
-                ;
+                };
 
             }
 
@@ -232,9 +211,9 @@ void Convertor::PrintBlocksToFile()
 
 
             current_size =textsArray.size();
-            for (int i = 0; i <current_size; i++) {
+            for (int i = 0; i < current_size; i++) {
 
-                for (int var = 0; var <current_size; var++) {
+                for (int var = 0; var < current_size; var++) {
                     textsArray.removeAt(var);
 
                 }
@@ -247,7 +226,7 @@ void Convertor::PrintBlocksToFile()
 
         it_Names++;
         int size_=listArray.size();
-        for (int i = 0; i <size_; i++) {
+        for (int i = 0; i < size_; i++) {
             listArray.pop_back();
         }
         // Добавляем объект текста в массив
@@ -256,20 +235,20 @@ void Convertor::PrintBlocksToFile()
     }
 
 
-    QString saveFileName=QString::fromStdString(this->f_str_name.toStdString()+".json");
+    QString saveFileName = QString::fromStdString(this->f_str_name.toStdString()+".json");
 
     // Создаём объект файла и открываем его на запись
     QFile jsonFile(saveFileName);
     if (!jsonFile.open(QIODevice::WriteOnly))
     {
-        cout<<"error"<<endl;
+        cout << "error" << endl;
         return;
     }
 
     // Записываем текущий объект Json в файл
     jsonFile.write(QJsonDocument(m_currentJsonObject).toJson(QJsonDocument::Indented));
     jsonFile.close();   // Закрываем файл
-    cout<<"file correct create"<<endl;
+    cout << "file correct create" << endl;
 
 
 
