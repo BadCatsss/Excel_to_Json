@@ -17,32 +17,23 @@ class Convertor
     size_t maxCols = 0;
     QXlsx::Document* xlsxR = nullptr;
     QXlsx::AbstractSheet* activeSheet = nullptr;
-    QString filePath=nullptr;
-    string savePath=nullptr;
+    QString filePath = nullptr;
+    string savePath = "";
     int sheet_count = 0;
     QMap<QString ,QJsonArray> valeMap;
     QJsonObject valueJsonObject;
-
-    QStringList  getSheetsList();
-    bool openBook();
-    void setActivetWorkSheet(QString);
     void calculateNotEmptyRowsCount();
     void calculateNotEmptyColumnsCount();
     void readXlsxFile();
     void createJsonObject();
     void writeJsonFile();
 
-
-
-
-
-
 public:
-
     void convert();
-    Convertor(const char* p);
-
-
+    bool openBook();
+    QStringList  getSheetsList();
+    void setActivetWorkSheet(QString);
+    Convertor(const QString& p);
 };
 
 
