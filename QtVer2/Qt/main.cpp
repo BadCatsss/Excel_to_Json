@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
     //Convertor cnv( QString::fromStdString( "D:\\old.xlsx"));//test open
-    if (argc>1) {
+    if (argc > 1) {
 
 
         Convertor cnv(QCoreApplication::arguments().at(1));

@@ -55,27 +55,27 @@ void Convertor::setActivetWorkSheet(QString p)
 QStringList  Convertor::getSheetsList()
 {
     cout << "Sheet is found" << endl;
-    QStringList list_;
+    QStringList sheetList;
     QTextStream qtout(stdout);
     for (auto i:  this->xlsxR->sheetNames())
     {
-        list_.push_back(i);
+        sheetList.push_back(i);
         cout << sheet_count << "  ";
         qtout << i << endl;
         sheet_count++;
     }
-    return list_;
+    return sheetList;
 }
 
 //pharse
-Convertor::Convertor(const QString& p)
+Convertor::Convertor(const QString& param)
 {
-    QFileInfo info(p);
+    QFileInfo info(param);
     filePath = info.absoluteFilePath();
     xlsxR = new QXlsx::Document(filePath);
-    string tmp_s = filePath.toStdString();
-    tmp_s.erase(tmp_s.begin() + tmp_s.find("."), tmp_s.end());
-    this->savePath = tmp_s;
+    string tmpString = filePath.toStdString();
+    tmpString.erase(tmpString.begin() + tmpString.find("."), tmpString.end());
+    this->savePath = tmpString;
 }
 void Convertor:: convert()
 {
