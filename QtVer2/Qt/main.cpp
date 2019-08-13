@@ -9,18 +9,20 @@ int main(int argc, char *argv[])
         Convertor cnv(QCoreApplication::arguments().at(1));
         if (cnv.openBook()) {
             cout << "file was open" << endl;
-            auto shList = cnv.getSheetsList();
-            for (auto i : shList)
-                cout << i.toStdString() << endl;
+            auto sheetList = cnv.getSheetsList();
+            for (auto listElement : sheetList)
+                cout << listElement.toStdString() << endl;
+            chooseAgain:
             cout << "choose sheet" << endl;
             int chooseNumber;
             cin >> chooseNumber;
-            if (chooseNumber >= 0 && chooseNumber <= shList.size()) {
-                cnv.setActivetWorkSheet(shList[chooseNumber]);
-                cout << shList[chooseNumber].toStdString() << endl;
+            if (chooseNumber >= 0 && chooseNumber <= sheetList.size()) {
+                cnv.setActivetWorkSheet(sheetList[chooseNumber]);
+                cout << sheetList[chooseNumber].toStdString() << endl;
             }
             else {
-                cout << "incorrect list number";
+                cout << "incorrect list number" << endl;
+                goto chooseAgain;
             }
             cnv.convert();
             return a.exec();
@@ -32,5 +34,6 @@ int main(int argc, char *argv[])
     }
     else {
         cout << "Program was run whitout arguments" << endl;
+        exit(-1);
     }
 }

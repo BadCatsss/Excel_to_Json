@@ -1,17 +1,15 @@
 ﻿#include <QCoreApplication>
 #include <QCoreApplication>
-#include "xlsxdocument.h"
+#include <QDebug>
 #include "xlsxchartsheet.h"
 #include "xlsxcellrange.h"
 #include "xlsxchart.h"
 #include "xlsxrichstring.h"
 #include "xlsxworkbook.h"
-#include <QDebug>
 #include "Convertor.h"
-#include <fstream>
+
 using namespace QXlsx;
 using namespace std;
-
 
 //book and sheet setup
 bool Convertor::openBook()
@@ -47,88 +45,76 @@ void Convertor::calculateNotEmptyColumnsCount( )
     cout << "col " << this->maxCols << endl;
 
 }
-void Convertor::setActivetWorkSheet(QString p)
+void Convertor::setActivetWorkSheet(QString chosenSheet)
 {
-    this->activeSheet = this->xlsxR->sheet(p);
+    this->activeSheet = this->xlsxR->sheet(chosenSheet);
     this->xlsxR->selectSheet(this->activeSheet->sheetName());
 }
 QStringList  Convertor::getSheetsList()
 {
     cout << "Sheet is found" << endl;
-    QStringList list_;
+    QStringList sheetList;
     QTextStream qtout(stdout);
-    for (auto i:  this->xlsxR->sheetNames())
+    for (auto sheet:  this->xlsxR->sheetNames())
     {
-        list_.push_back(i);
+        sheetList.push_back(sheet);
         cout << sheetCount << "  ";
-        qtout << i << endl;
+        qtout << sheet << endl;
         sheetCount++;
     }
-    return list_;
+    return sheetList;
 }
 
 //pharse
-Convertor::Convertor(const QString& p)
+Convertor::Convertor(const QString& param)
 {
-    QFileInfo info(p);
+    QFileInfo info(param);
     filePath = info.absoluteFilePath();
     xlsxR = new QXlsx::Document(filePath);
-    string tmp_s = filePath.toStdString();
-    tmp_s.erase(tmp_s.begin() + tmp_s.find("."), tmp_s.end());
-    this->savePath = tmp_s;
+    string tmpString = filePath.toStdString();
+    tmpString.erase(tmpString.begin() + tmpString.find("."), tmpString.end());
+    this->savePath = tmpString;
 }
 void Convertor:: convert()
 {
-
-
     this->calculateNotEmptyRowsCount();
     this->calculateNotEmptyColumnsCount();
     this->readXlsxFile();
     this->createJsonObject();
     this->writeJsonFile();
-
-
-
 }
 void Convertor:: readXlsxFile()
 {
     for (int r = 2; r < maxRows; ++r) {
-        QJsonArray arr;
+        QJsonArray arrayOfValue;
         for (int c = 2; c < maxCols; ++c) {
             if (this->xlsxR->cellAt(r,1)->readValue().toString() == "UMTS" && c == maxCols - 1 || c == maxCols - 2) {
-                arr.append(30);
+                arrayOfValue.append(30);
             }
             else {
-                arr.append((this->xlsxR->cellAt(r,c)->readValue().toJsonValue()));
+                arrayOfValue.append((this->xlsxR->cellAt(r,c)->readValue().toJsonValue()));
             }
 
         }
-        valeMap[this->xlsxR->cellAt(r,1)->readValue().toString()].append(arr);
+        valeMap[this->xlsxR->cellAt(r,1)->readValue().toString()].append(arrayOfValue);
     }
-
 }
 void  Convertor ::createJsonObject()
 {
-
-    for (auto i : valeMap.keys()) {
-
-        this->valueJsonObject[i] = valeMap.take(i);
+    for (auto currentKey : valeMap.keys()) {
+        this->valueJsonObject[currentKey] = valeMap.take(currentKey);
     }
-
 }
 void Convertor::writeJsonFile()
 {
-
     QString saveFileName = QString::fromStdString(this->savePath + ".json");
-
     // Создаём объект файла и открываем его на запись
     QFile jsonFile(saveFileName);
     if ( !jsonFile.open(QIODevice::WriteOnly) )
     {
-        cout << "error" << endl;
-        return;
+        cout << "write error" << endl;
+        exit(-1);
     }
-
     // Записываем текущий объект Json в файл
     jsonFile.write(QJsonDocument(this->valueJsonObject).toJson(QJsonDocument::Indented));
     jsonFile.close();   // Закрываем файл
