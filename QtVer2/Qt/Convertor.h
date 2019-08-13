@@ -19,7 +19,7 @@ class Convertor
     QXlsx::AbstractSheet* activeSheet = nullptr;
     QString filePath = nullptr;
     string savePath = "";
-    int sheet_count = 0;
+    int sheetCount = 0;
     QMap<QString ,QJsonArray> valeMap;
     QJsonObject valueJsonObject;
     void calculateNotEmptyRowsCount();

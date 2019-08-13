@@ -43,7 +43,7 @@ void Convertor::calculateNotEmptyColumnsCount( )
         col++;
         cell = this->xlsxR->cellAt(1, col);
     }
-    this->maxCols=col;
+    this->maxCols = col;
     cout << "col " << this->maxCols << endl;
 
 }
@@ -55,27 +55,27 @@ void Convertor::setActivetWorkSheet(QString p)
 QStringList  Convertor::getSheetsList()
 {
     cout << "Sheet is found" << endl;
-    QStringList sheetList;
+    QStringList list_;
     QTextStream qtout(stdout);
     for (auto i:  this->xlsxR->sheetNames())
     {
-        sheetList.push_back(i);
-        cout << sheet_count << "  ";
+        list_.push_back(i);
+        cout << sheetCount << "  ";
         qtout << i << endl;
-        sheet_count++;
+        sheetCount++;
     }
-    return sheetList;
+    return list_;
 }
 
 //pharse
-Convertor::Convertor(const QString& param)
+Convertor::Convertor(const QString& p)
 {
-    QFileInfo info(param);
+    QFileInfo info(p);
     filePath = info.absoluteFilePath();
     xlsxR = new QXlsx::Document(filePath);
-    string tmpString = filePath.toStdString();
-    tmpString.erase(tmpString.begin() + tmpString.find("."), tmpString.end());
-    this->savePath = tmpString;
+    string tmp_s = filePath.toStdString();
+    tmp_s.erase(tmp_s.begin() + tmp_s.find("."), tmp_s.end());
+    this->savePath = tmp_s;
 }
 void Convertor:: convert()
 {
