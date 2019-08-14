@@ -17,27 +17,26 @@ class SettingsConverter
     size_t maxCols = 0;
     QXlsx::Document* xlsxR = nullptr;
     QXlsx::AbstractSheet* activeSheet = nullptr;
-    QString filePath = nullptr;
+    QString filePath = "";
     string savePath = "";
-    QString errorValue=nullptr;
     int sheetCount = 0;
-    QMap<QString ,QJsonArray> valeMap;
+    QMap<QString, QJsonArray> valuesMap;
+    QVector<QString> errorValues;
     QJsonObject valueJsonObject;
     void calculateNotEmptyRowsCount();
     void calculateNotEmptyColumnsCount();
-    void readXlsxFile();
-    void createJsonObject();
-    void writeJsonFile();
-    void setLastError(QString error);
-
+    void addErrorToList(QString error);
+    bool readXlsxFile();
+    bool createJsonObject();
+    bool writeJsonFile();
 
 public:
-    void convert();
+    bool convert();
     bool openBook();
+    void setActivetWorkSheet(const QString&);
+    void printErrorMesseges();
     QStringList  getSheetsList();
-    void setActivetWorkSheet(QString);
     SettingsConverter(const QString& p);
-    QString getLastError();
 };
 
 

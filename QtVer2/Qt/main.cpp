@@ -4,22 +4,27 @@
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
-    //Convertor cnv( QString::fromStdString( "D:\\old.xlsx"));//test open
     if (argc ==2) {
         SettingsConverter cnv(QCoreApplication::arguments().at(1));
-        if (cnv.openBook()) {
+        if (cnv.openBook())
+        {
             cout << "file was open" << endl;
             auto sheetList = cnv.getSheetsList();
             cnv.setActivetWorkSheet(sheetList[0]);
-            cnv.convert();
-            a.exec();
-            a.exit(0);
-        }
+            if (cnv.convert()) {
+                a.exec();
+                a.exit(0);
+            }
+            else {
+                cnv.printErrorMesseges();
+                exit(-1);
+            }
+        }  //argc ==2  // if(cnv.openBook())
         else {
-           cout<<cnv.getLastError().toStdString()<<endl;
+            cnv.printErrorMesseges();
             exit(-1);
         }
-    }
+    } // if(argc == 2)
     else  {
         string userInput;
         cout << "input path to file" << endl;
@@ -30,9 +35,11 @@ int main(int argc, char *argv[])
             cout << "file was open" << endl;
             auto sheetList = cnv.getSheetsList();
             for (auto listElement : sheetList)
+            {
                 cout << listElement.toStdString() << endl;
-            int userInputTry=0;
-            while (userInputTry==0) {
+            }
+            int userInputTry = 0;
+            while (userInputTry == 0) {
                 cout << "choose sheet" << endl;
                 int chooseNumber;
                 cin >> chooseNumber;
@@ -40,20 +47,22 @@ int main(int argc, char *argv[])
                     userInputTry++;
                     cnv.setActivetWorkSheet(sheetList[chooseNumber]);
                     cout << sheetList[chooseNumber].toStdString() << endl;
-                    cnv.convert();
-                    a.exit(0);
+                    if (cnv.convert()) {
+                        a.exit(0);
+                    }
+                    else {
+                        cnv.printErrorMesseges();
+                        a.exit(-1);
+                    }
                 }
                 else {
                     cout << "incorrect list number" << endl;
                 }
             }
-
-        }
+        }  //if(argc != 2) // if(cnv.openBook())
         else {
-            cout<<cnv.getLastError().toStdString()<<endl;
-             exit(-1);
+            cnv.printErrorMesseges();
+            exit(-1);
         }
     }
-
-
 }

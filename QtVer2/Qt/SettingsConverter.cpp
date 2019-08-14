@@ -11,27 +11,28 @@
 using namespace QXlsx;
 using namespace std;
 
-void SettingsConverter:: setLastError(QString errorMessege)
+void SettingsConverter:: addErrorToList(QString errorMessege)
 {
-    this->errorValue=errorMessege;
+    this->errorValues.push_back(errorMessege);
 }
-QString SettingsConverter::getLastError()
+void SettingsConverter:: printErrorMesseges()
 {
-    return this->errorValue;
+    for (auto errorMessege : this->errorValues) {
+        cout << errorMessege.toStdString() << endl;
+    }
 }
 //book and sheet setup
 bool SettingsConverter::openBook()
 {
     string tmpString = filePath.toStdString();
-    int startSearchPosition=tmpString.find(".");
-    if (tmpString.find("xlsx",startSearchPosition)!=std::string::npos) {
+    int startSearchPosition = tmpString.find(".");
+    if (tmpString.find("xlsx",startSearchPosition) != std::string::npos) {
         xlsxR = new QXlsx::Document(filePath);
-
         tmpString.erase(tmpString.begin() + tmpString.find("."), tmpString.end());
         this->savePath = tmpString;
     }
     else {
-        setLastError("incorrect format");
+        addErrorToList("incorrect format");
         return false;
     }
 
@@ -40,7 +41,7 @@ bool SettingsConverter::openBook()
         return true;
     }
     else {
-        setLastError("cant open file");
+        addErrorToList("cant open file");
         return false;
     }
 }
@@ -67,7 +68,7 @@ void SettingsConverter::calculateNotEmptyColumnsCount( )
     cout << "col " << this->maxCols << endl;
 
 }
-void SettingsConverter::setActivetWorkSheet(QString chosenSheet)
+void SettingsConverter::setActivetWorkSheet(const QString& chosenSheet)
 {
     this->activeSheet = this->xlsxR->sheet(chosenSheet);
     this->xlsxR->selectSheet(this->activeSheet->sheetName());
@@ -77,7 +78,7 @@ QStringList  SettingsConverter::getSheetsList()
     cout << "Sheet is found" << endl;
     QStringList sheetList;
     QTextStream qtout(stdout);
-    for (auto sheet:  this->xlsxR->sheetNames())
+    for (auto sheet : this->xlsxR->sheetNames())
     {
         sheetList.push_back(sheet);
         cout << sheetCount << "  ";
@@ -93,19 +94,28 @@ SettingsConverter::SettingsConverter(const QString& param)
     QFileInfo info(param);
     filePath = info.absoluteFilePath();
 }
-void SettingsConverter:: convert()
+bool SettingsConverter:: convert()
 {
     this->calculateNotEmptyRowsCount();
     this->calculateNotEmptyColumnsCount();
-    this->readXlsxFile();
     this->createJsonObject();
-    this->writeJsonFile();
+    if ( !this->readXlsxFile() || !this->createJsonObject() || !this->writeJsonFile()) {
+        this->addErrorToList("convert error");
+        return false;
+    }
+    else {
+        return true;
+    }
+
+
 }
-void SettingsConverter:: readXlsxFile()
+bool SettingsConverter:: readXlsxFile()
 {
-    for (int r = 2; r < maxRows; ++r) {
+    int r = 2;
+    int c = 2;
+    for (; r < maxRows; ++r) {
         QJsonArray arrayOfValue;
-        for (int c = 2; c < maxCols; ++c) {
+        for (; c < maxCols; ++c) {
             if (this->xlsxR->cellAt(r,1)->readValue().toString() == "UMTS" && c == maxCols - 1 ) {
                 arrayOfValue.append((this->xlsxR->cellAt(r,c)->readValue().toJsonValue()));
                 arrayOfValue.append(30);
@@ -114,31 +124,44 @@ void SettingsConverter:: readXlsxFile()
             else {
                 arrayOfValue.append((this->xlsxR->cellAt(r,c)->readValue().toJsonValue()));
             }
-
         }
-        valeMap[this->xlsxR->cellAt(r,1)->readValue().toString()].append(arrayOfValue);
+        valuesMap[this->xlsxR->cellAt(r,1)->readValue().toString()].append(arrayOfValue);
+    }
+    if (r == maxRows && c == maxCols) {
+        return true;
+    }
+    else {
+        this->addErrorToList("read error");
+        return false;
     }
 }
-void  SettingsConverter ::createJsonObject()
+bool  SettingsConverter::createJsonObject()
 {
-    for (auto currentKey : valeMap.keys()) {
-        this->valueJsonObject[currentKey] = valeMap.take(currentKey);
+        for (auto currentKey : valuesMap.keys()) {
+            this->valueJsonObject[currentKey] = valuesMap.take(currentKey);
+        }
+    if (this->valueJsonObject.size() != 0) {
+        return true;
+    }
+    else {
+        this->addErrorToList("JsonObject create error");
+        return false;
     }
 }
-void SettingsConverter::writeJsonFile()
+bool SettingsConverter::writeJsonFile()
 {
     QString saveFileName = QString::fromStdString(this->savePath + ".json");
     // Создаём объект файла и открываем его на запись
     QFile jsonFile(saveFileName);
     if ( !jsonFile.open(QIODevice::WriteOnly) )
     {
-        cout << "write error" << endl;
-        exit(-1);
+        addErrorToList("write error");
+        return false;
     }
     // Записываем текущий объект Json в файл
     jsonFile.write(QJsonDocument(this->valueJsonObject).toJson(QJsonDocument::Indented));
     jsonFile.close();   // Закрываем файл
     cout << "file correct create" << endl;
-
+    return true;
 }
 
