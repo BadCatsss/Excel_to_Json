@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
             a.exit(0);
         }
         else {
-           cout<<cnv.getLastErrot().toStdString()<<endl;
+           cout<<cnv.getLastError().toStdString()<<endl;
             exit(-1);
         }
     }
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
         }
         else {
-            cout<<cnv.getLastErrot().toStdString()<<endl;
+            cout<<cnv.getLastError().toStdString()<<endl;
              exit(-1);
         }
     }
