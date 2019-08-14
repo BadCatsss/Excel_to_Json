@@ -113,6 +113,7 @@ bool SettingsConverter:: readXlsxFile()
 {
     int r = 2;
     int c = 2;
+    bool valueIsCorrect = true;
     for (; r < maxRows; ++r) {
         QJsonArray arrayOfValue;
         for (; c < maxCols; ++c) {
@@ -126,8 +127,16 @@ bool SettingsConverter:: readXlsxFile()
             }
         }
         valuesMap[this->xlsxR->cellAt(r,1)->readValue().toString()].append(arrayOfValue);
+        for (auto currentArray : valuesMap) {
+            for (auto currentValue : currentArray) {
+                if (currentValue.isNull()) {
+                    valueIsCorrect = false;
+                }
+
+            }
+        }
     }
-    if (r == maxRows && c == maxCols) {
+    if (r == maxRows && c == maxCols && valueIsCorrect && valuesMap.size() != 0) {
         return true;
     }
     else {
@@ -137,9 +146,9 @@ bool SettingsConverter:: readXlsxFile()
 }
 bool  SettingsConverter::createJsonObject()
 {
-        for (auto currentKey : valuesMap.keys()) {
-            this->valueJsonObject[currentKey] = valuesMap.take(currentKey);
-        }
+    for (auto currentKey : valuesMap.keys()) {
+        this->valueJsonObject[currentKey] = valuesMap.take(currentKey);
+    }
     if (this->valueJsonObject.size() != 0) {
         return true;
     }
