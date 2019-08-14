@@ -131,6 +131,7 @@ bool SettingsConverter:: readXlsxFile()
             for (auto currentValue : currentArray) {
                 if (currentValue.isNull()) {
                     valueIsCorrect = false;
+                    break;
                 }
 
             }
