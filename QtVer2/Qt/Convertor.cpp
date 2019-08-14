@@ -88,7 +88,9 @@ void Convertor:: readXlsxFile()
     for (int r = 2; r < maxRows; ++r) {
         QJsonArray arrayOfValue;
         for (int c = 2; c < maxCols; ++c) {
-            if (this->xlsxR->cellAt(r,1)->readValue().toString() == "UMTS" && c == maxCols - 1 || c == maxCols - 2) {
+            if (this->xlsxR->cellAt(r,1)->readValue().toString() == "UMTS" && c == maxCols - 1 ) {
+                arrayOfValue.append((this->xlsxR->cellAt(r,c)->readValue().toJsonValue()));
+                arrayOfValue.append(30);
                 arrayOfValue.append(30);
             }
             else {
