@@ -49,6 +49,7 @@ int main(int argc, char *argv[])
                     cout << sheetList[chooseNumber].toStdString() << endl;
                     if (cnv.convert()) {
                         a.exit(0);
+
                     }
                     else {
                         cnv.printErrorMesseges();

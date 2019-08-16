@@ -66,7 +66,6 @@ void SettingsConverter::calculateNotEmptyColumnsCount( )
     }
     this->maxCols = col;
     cout << "col " << this->maxCols << endl;
-
 }
 void SettingsConverter::setActivetWorkSheet(const QString& chosenSheet)
 {
@@ -98,7 +97,6 @@ bool SettingsConverter:: convert()
 {
     this->calculateNotEmptyRowsCount();
     this->calculateNotEmptyColumnsCount();
-    this->createJsonObject();
     if ( !this->readXlsxFile() || !this->createJsonObject() || !this->writeJsonFile()) {
         this->addErrorToList("convert error");
         return false;
@@ -106,8 +104,6 @@ bool SettingsConverter:: convert()
     else {
         return true;
     }
-
-
 }
 bool SettingsConverter:: readXlsxFile()
 {
