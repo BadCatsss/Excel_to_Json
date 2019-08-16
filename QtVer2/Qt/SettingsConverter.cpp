@@ -111,12 +111,12 @@ bool SettingsConverter:: convert()
 }
 bool SettingsConverter:: readXlsxFile()
 {
-    int r = 2;
-    int c = 2;
+
+
     bool valueIsCorrect = true;
-    for (; r < maxRows; ++r) {
+    for ( int r = 2; r < maxRows; ++r) {
         QJsonArray arrayOfValue;
-        for (; c < maxCols; ++c) {
+        for (  int c = 2; c < maxCols; ++c) {
             if (this->xlsxR->cellAt(r,1)->readValue().toString() == "UMTS" && c == maxCols - 1 ) {
                 arrayOfValue.append((this->xlsxR->cellAt(r,c)->readValue().toJsonValue()));
                 arrayOfValue.append(30);
@@ -127,17 +127,16 @@ bool SettingsConverter:: readXlsxFile()
             }
         }
         valuesMap[this->xlsxR->cellAt(r,1)->readValue().toString()].append(arrayOfValue);
-        for (auto currentArray : valuesMap) {
-            for (auto currentValue : currentArray) {
-                if (currentValue.isNull()) {
-                    valueIsCorrect = false;
-                    break;
-                }
+    }
 
+    for (auto currentArray : valuesMap) {
+        for (auto currentValue : currentArray) {
+            if (currentValue.isNull()) {
+                valueIsCorrect = false;
             }
         }
     }
-    if (r == maxRows && c == maxCols && valueIsCorrect && valuesMap.size() != 0) {
+    if (valueIsCorrect && valuesMap.size() != 0) {
         return true;
     }
     else {
